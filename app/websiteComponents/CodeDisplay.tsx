@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCopy, FaCheck, FaChevronDown } from 'react-icons/fa';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface CodeFramework {
   id: string;
@@ -43,6 +45,13 @@ export default function CodeDisplay({ frameworks, reactNativeSupport }: CodeDisp
       return reactNativeSupport[reactNativeLanguage];
     }
     return framework?.code || '';
+  };
+
+  const getLanguage = () => {
+    if (selectedFramework === 'swiftui') return 'swift';
+    if (selectedFramework === 'compose') return 'kotlin';
+    if (selectedFramework === 'reactnative') return reactNativeLanguage === 'typescript' ? 'typescript' : 'javascript';
+    return 'javascript';
   };
 
   const copyToClipboard = async () => {
@@ -142,9 +151,20 @@ export default function CodeDisplay({ frameworks, reactNativeSupport }: CodeDisp
       
       {/* Code Display */}
       <div className="relative">
-        <pre className="p-6 text-sm text-muted-foreground overflow-x-auto bg-violet-500/5">
-          <code>{getCodeExample()}</code>
-        </pre>
+        <SyntaxHighlighter
+          language={getLanguage()}
+          style={vscDarkPlus}
+          customStyle={{
+            margin: 0,
+            padding: '1.5rem',
+            fontSize: '0.875rem',
+            background: 'rgba(124, 58, 237, 0.05)',
+            borderRadius: 0,
+          }}
+          showLineNumbers={false}
+        >
+          {getCodeExample()}
+        </SyntaxHighlighter>
         <button
           onClick={copyToClipboard}
           className="absolute top-4 right-4 p-2 bg-background border border-violet-500/30 rounded-md hover:bg-violet-500/20 hover:border-violet-500 transition-colors"

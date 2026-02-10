@@ -79,7 +79,7 @@ export function Header() {
           </motion.div>
           
           <div className="flex-1 flex justify-center">
-            <SearchBar />
+            <SearchBar onOpen={() => setSearchOpen(true)} />
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">

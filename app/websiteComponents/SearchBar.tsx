@@ -1,25 +1,24 @@
+"use client";
+
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-const SearchBar = () => {
+interface SearchBarProps {
+  onOpen?: () => void;
+}
+
+const SearchBar = ({ onOpen }: SearchBarProps) => {
   return (
-    <form className="hidden md:block max-w max-w-fit">
-      <label htmlFor="search" className="sr-only">
-        Search
-      </label>
-      <div className="relative">
-        {/* Search Icon */}
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground" />
-        </div>
-        <input
-          type="search"
-          id="search"
-          placeholder="Search components"
-          required
-          className="w-full pl-10 pr-28 py-2.5 text-sm rounded-lg border border-border text-foreground placeholder:text-muted-foreground bg-transparent backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-        />
+    <button
+      onClick={onOpen}
+      className="hidden md:flex items-center gap-3 max-w-md w-full px-4 py-2.5 text-sm rounded-lg border border-border text-muted-foreground bg-transparent backdrop-blur-md hover:border-primary/50 transition-colors"
+    >
+      <MagnifyingGlassIcon className="w-4 h-4" />
+      <span>Search components</span>
+      <div className="ml-auto flex items-center gap-1">
+        <kbd className="px-2 py-1 text-xs bg-background border border-border rounded">⌘</kbd>
+        <kbd className="px-2 py-1 text-xs bg-background border border-border rounded">K</kbd>
       </div>
-    </form>
+    </button>
   );
 };
 

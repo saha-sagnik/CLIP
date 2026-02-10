@@ -1,16 +1,18 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { swiftUIButtonCode, swiftUIButtonProps } from './swiftui';
 import { composeButtonCode, composeButtonProps } from './compose';
 import { reactNativeButtonCodeTS, reactNativeButtonCodeJS, reactNativeButtonProps } from './reactnative';
-import MobileFrame from '../../websiteComponents/MobileFrame';
+import ResponsiveMobileFrame from '../../websiteComponents/ResponsiveMobileFrame';
+import DeviceSelector from '../../websiteComponents/DeviceSelector';
 import PropsTable from '../../websiteComponents/PropsTable';
 import CodeDisplay from '../../websiteComponents/CodeDisplay';
 import HelpImprove from '../../websiteComponents/HelpImprove';
 import Dependencies from '../../websiteComponents/Dependencies';
 import CLIInstall from '../../websiteComponents/CLIInstall';
+import { devices, DeviceConfig } from '../../constants/devices';
 
 const frameworkLabels = {
   swiftui: 'SwiftUI',
@@ -34,6 +36,8 @@ export default function ButtonPage() {
   const [activeTab, setActiveTab] = useState('preview');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('issue'); // 'issue' or 'feature'
+  const [selectedDevice, setSelectedDevice] = useState<DeviceConfig>(devices[0]); // Default to iPhone 14 Pro
+  const [scale, setScale] = useState(0.7);
 
   // Enhanced customization controls
   const [customization, setCustomization] = useState({
@@ -52,6 +56,35 @@ export default function ButtonPage() {
     iconPosition: 'left'
   });
 
+  // Map variant to styles
+  const variantStyles = {
+    primary: { backgroundColor: '#7C3AED', textColor: '#FFFFFF' },
+    secondary: { backgroundColor: '#64748B', textColor: '#FFFFFF' },
+    ghost: { backgroundColor: 'transparent', textColor: '#7C3AED' }
+  };
+
+  // Map size to dimensions
+  const sizeStyles = {
+    small: { fontSize: 14, paddingX: 16, paddingY: 8 },
+    medium: { fontSize: 16, paddingX: 24, paddingY: 12 },
+    large: { fontSize: 18, paddingX: 32, paddingY: 16 }
+  };
+
+  // Update customization when variant or size changes
+  useEffect(() => {
+    const variant = variantStyles[customization.variant as keyof typeof variantStyles];
+    const size = sizeStyles[customization.size as keyof typeof sizeStyles];
+    
+    setCustomization(prev => ({
+      ...prev,
+      backgroundColor: variant.backgroundColor,
+      textColor: variant.textColor,
+      fontSize: size.fontSize,
+      paddingX: size.paddingX,
+      paddingY: size.paddingY
+    }));
+  }, [customization.variant, customization.size]);
+
   const openModal = (type: 'issue' | 'feature') => {
     setModalType(type);
     setShowModal(true);
@@ -63,18 +96,18 @@ export default function ButtonPage() {
   };
 
   return (
-    <div className="px-8 py-32">
-      <div className="max-w-6xl mx-auto">
+    <div className="px-4 md:px-8 py-24 md:py-32">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-foreground">Button</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Button</h1>
+          <p className="text-base md:text-lg text-muted-foreground">
             A fundamental UI component for triggering actions across SwiftUI, Jetpack Compose, and React Native.
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex flex-wrap gap-3 mb-8">
           {[
             { id: 'preview', label: 'Preview', icon: '👁' },
             { id: 'code', label: 'Code', icon: '</>' },
@@ -105,21 +138,49 @@ export default function ButtonPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2">
-            {/* Preview/Code Content */}
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-              {activeTab === 'preview' && (
-                <div className="p-8">
-                  <div className="flex flex-col items-center justify-center min-h-[400px] bg-violet-500/5 rounded-lg">
-                    <MobileFrame platform="ios">
+        {/* New Single Page Layout */}
+        <div className="space-y-8">
+          {/* Preview Section */}
+          {activeTab === 'preview' && (
+            <>
+              <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-8">
+                {/* Preview Area */}
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  <div className="p-6 border-b border-border flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-foreground">Device Preview</h2>
+                      <p className="text-sm text-muted-foreground">See how your component looks on different devices</p>
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <DeviceSelector 
+                        selectedDevice={selectedDevice}
+                        onDeviceChange={setSelectedDevice}
+                      />
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs text-muted-foreground">Scale:</label>
+                        <input
+                          type="range"
+                          min="0.3"
+                          max="1"
+                          step="0.1"
+                          value={scale}
+                          onChange={(e) => setScale(parseFloat(e.target.value))}
+                          className="w-20 accent-violet-500"
+                        />
+                        <span className="text-xs text-muted-foreground w-8">{Math.round(scale * 100)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-8 bg-violet-500/5 flex items-center justify-center min-h-[600px]">
+                    <ResponsiveMobileFrame device={selectedDevice} scale={scale}>
                       <div className="flex items-center justify-center h-full bg-gradient-to-br from-violet-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
                         <button 
                           className={`font-semibold shadow-lg transition-all hover:scale-105 ${
                             customization.fullWidth ? 'w-4/5' : ''
                           } ${
                             customization.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                          } ${
+                            customization.variant === 'ghost' ? 'border-2 border-violet-500' : ''
                           }`}
                           style={{
                             backgroundColor: customization.backgroundColor,
@@ -152,173 +213,193 @@ export default function ButtonPage() {
                           )}
                         </button>
                       </div>
-                    </MobileFrame>
+                    </ResponsiveMobileFrame>
                   </div>
                 </div>
-              )}
 
-              {activeTab === 'code' && (
-                <CodeDisplay 
-                  frameworks={frameworks}
-                  reactNativeSupport={{
-                    typescript: reactNativeButtonCodeTS,
-                    javascript: reactNativeButtonCodeJS
-                  }}
-                />
-              )}
+                {/* Customization Panel */}
+                <div className="space-y-6">
+                  <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold mb-4">Customize</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Variant</label>
+                      <select
+                        value={customization.variant}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, variant: e.target.value }))}
+                        className="w-full px-3 py-2 bg-background border border-violet-500/30 rounded-md text-foreground focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                      >
+                        <option value="primary">Primary</option>
+                        <option value="secondary">Secondary</option>
+                        <option value="ghost">Ghost</option>
+                      </select>
+                    </div>
 
-              {activeTab === 'cli' && (
-                <CLIInstall componentName="button" />
-              )}
-            </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Size</label>
+                      <select
+                        value={customization.size}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, size: e.target.value }))}
+                        className="w-full px-3 py-2 bg-background border border-violet-500/30 rounded-md text-foreground focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                      >
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Border Radius</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="20"
+                        value={customization.borderRadius}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, borderRadius: parseInt(e.target.value) }))}
+                        className="w-full accent-violet-500"
+                      />
+                      <span className="text-xs text-muted-foreground">{customization.borderRadius}px</span>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Font Size</label>
+                      <input
+                        type="range"
+                        min="12"
+                        max="24"
+                        value={customization.fontSize}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, fontSize: parseInt(e.target.value) }))}
+                        className="w-full accent-violet-500"
+                      />
+                      <span className="text-xs text-muted-foreground">{customization.fontSize}px</span>
+                    </div>
 
-            {/* Props Section - Now below preview */}
-            <PropsTable props={getSelectedProps()} />
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Background Color</label>
+                      <input
+                        type="color"
+                        value={customization.backgroundColor}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                        className="w-full h-10 rounded-md border border-violet-500/30"
+                      />
+                    </div>
 
-            {/* Help Improve Section */}
-            <HelpImprove 
-              onReportIssue={() => openModal('issue')}
-              onRequestFeature={() => openModal('feature')}
-            />
-          </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Text Color</label>
+                      <input
+                        type="color"
+                        value={customization.textColor}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, textColor: e.target.value }))}
+                        className="w-full h-10 rounded-md border border-violet-500/30"
+                      />
+                    </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Customize Section */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Customize</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Variant</label>
-                  <select
-                    value={customization.variant}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, variant: e.target.value }))}
-                    className="w-full px-3 py-2 bg-background border border-violet-500/30 rounded-md text-foreground focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                  >
-                    <option value="primary">Primary</option>
-                    <option value="secondary">Secondary</option>
-                    <option value="ghost">Ghost</option>
-                  </select>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Full Width</label>
+                      <input
+                        type="checkbox"
+                        checked={customization.fullWidth}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, fullWidth: e.target.checked }))}
+                        className="w-4 h-4 accent-violet-500"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Size</label>
-                  <select
-                    value={customization.size}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, size: e.target.value }))}
-                    className="w-full px-3 py-2 bg-background border border-violet-500/30 rounded-md text-foreground focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                  >
-                    <option value="small">Small</option>
-                    <option value="medium">Medium</option>
-                    <option value="large">Large</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">Border Radius</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="20"
-                    value={customization.borderRadius}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, borderRadius: parseInt(e.target.value) }))}
-                    className="w-full accent-violet-500"
-                  />
-                  <span className="text-xs text-muted-foreground">{customization.borderRadius}px</span>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">Font Size</label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="24"
-                    value={customization.fontSize}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, fontSize: parseInt(e.target.value) }))}
-                    className="w-full accent-violet-500"
-                  />
-                  <span className="text-xs text-muted-foreground">{customization.fontSize}px</span>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Disabled</label>
+                      <input
+                        type="checkbox"
+                        checked={customization.disabled}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, disabled: e.target.checked }))}
+                        className="w-4 h-4 accent-violet-500"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Background Color</label>
-                  <input
-                    type="color"
-                    value={customization.backgroundColor}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, backgroundColor: e.target.value }))}
-                    className="w-full h-10 rounded-md border border-violet-500/30"
-                  />
-                </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Loading</label>
+                      <input
+                        type="checkbox"
+                        checked={customization.loading}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, loading: e.target.checked }))}
+                        className="w-4 h-4 accent-violet-500"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Text Color</label>
-                  <input
-                    type="color"
-                    value={customization.textColor}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, textColor: e.target.value }))}
-                    className="w-full h-10 rounded-md border border-violet-500/30"
-                  />
-                </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Show Icon</label>
+                      <input
+                        type="checkbox"
+                        checked={customization.showIcon}
+                        onChange={(e) => setCustomization(prev => ({ ...prev, showIcon: e.target.checked }))}
+                        className="w-4 h-4 accent-violet-500"
+                      />
+                    </div>
 
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Full Width</label>
-                  <input
-                    type="checkbox"
-                    checked={customization.fullWidth}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, fullWidth: e.target.checked }))}
-                    className="w-4 h-4 accent-violet-500"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Disabled</label>
-                  <input
-                    type="checkbox"
-                    checked={customization.disabled}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, disabled: e.target.checked }))}
-                    className="w-4 h-4 accent-violet-500"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Loading</label>
-                  <input
-                    type="checkbox"
-                    checked={customization.loading}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, loading: e.target.checked }))}
-                    className="w-4 h-4 accent-violet-500"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Show Icon</label>
-                  <input
-                    type="checkbox"
-                    checked={customization.showIcon}
-                    onChange={(e) => setCustomization(prev => ({ ...prev, showIcon: e.target.checked }))}
-                    className="w-4 h-4 accent-violet-500"
-                  />
-                </div>
-
-                {customization.showIcon && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Icon Position</label>
-                    <select
-                      value={customization.iconPosition}
-                      onChange={(e) => setCustomization(prev => ({ ...prev, iconPosition: e.target.value }))}
-                      className="w-full px-3 py-2 bg-background border border-violet-500/30 rounded-md text-foreground focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                    >
-                      <option value="left">Left</option>
-                      <option value="right">Right</option>
-                    </select>
+                    {customization.showIcon && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Icon Position</label>
+                        <select
+                          value={customization.iconPosition}
+                          onChange={(e) => setCustomization(prev => ({ ...prev, iconPosition: e.target.value }))}
+                          className="w-full px-3 py-2 bg-background border border-violet-500/30 rounded-md text-foreground focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                        >
+                          <option value="left">Left</option>
+                          <option value="right">Right</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
+                  {/* Dependencies Section */}
+                  <Dependencies dependencies={dependencies} />
+                </div>
               </div>
-            </div>
+            </>
+          )}
 
-            {/* Dependencies Section */}
-            <Dependencies dependencies={dependencies} />
+          {/* Code Section */}
+          {activeTab === 'code' && (
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="p-6 border-b border-border">
+                <h2 className="text-lg font-semibold text-foreground">Code</h2>
+                <p className="text-sm text-muted-foreground">Copy the code for your preferred platform</p>
+              </div>
+
+              <CodeDisplay 
+                frameworks={frameworks}
+                reactNativeSupport={{
+                  typescript: reactNativeButtonCodeTS,
+                  javascript: reactNativeButtonCodeJS
+                }}
+              />
+            </div>
+          )}
+
+          {/* CLI Section */}
+          {activeTab === 'cli' && (
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="p-6 border-b border-border">
+                <h2 className="text-lg font-semibold text-foreground">CLI Installation</h2>
+                <p className="text-sm text-muted-foreground">Install this component via command line</p>
+              </div>
+              <CLIInstall componentName="button" />
+            </div>
+          )}
+
+          {/* Props Section */}
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-border">
+              <h2 className="text-lg font-semibold text-foreground">Props</h2>
+              <p className="text-sm text-muted-foreground">Available properties and their types</p>
+            </div>
+            <PropsTable props={getSelectedProps()} />
           </div>
+
+          {/* Help Improve Section */}
+          <HelpImprove 
+            onReportIssue={() => openModal('issue')}
+            onRequestFeature={() => openModal('feature')}
+          />
         </div>
       </div>
 

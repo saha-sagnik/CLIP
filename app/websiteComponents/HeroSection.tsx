@@ -33,7 +33,7 @@ export default function HeroSection() {
             <span className="text-sm text-muted-foreground mt-1">Platforms</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-4xl font-extrabold text-primary">100+</span>
+            <span className="text-4xl font-extrabold text-primary">30+</span>
             <span className="text-sm text-muted-foreground mt-1">Components</span>
           </div>
           <div className="flex flex-col items-center">
